@@ -1,0 +1,218 @@
+/* Apple-like Dark Mode Theme */
+body {
+    background-color: #1e1e1e; /* Dark background color */
+    color: #fff; /* Light text color */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Apple-like font stack */
+}
+
+/* Form Styling */
+.form-group label {
+    color: #0070c9; /* Apple-like blue color for labels */
+    font-size: 14px; /* Smaller label font size */
+    font-weight: bold; /* Bold label text */
+}
+
+.form-control {
+    background-color: #2e2e2e; /* Dark input background color */
+    color: #fff; /* Light text color for inputs */
+    border: 1px solid #4d4d4d; /* Dark border color */
+    border-radius: 5px; /* Rounded corners for inputs */
+    font-size: 12px; /* Smaller input font size */
+}
+
+.form-text {
+    color: #888; /* Light text color for helper text */
+    font-size: 10px; /* Smaller helper text font size */
+}
+
+.form-check-label {
+    color: #fff; /* Light text color for form check labels */
+    font-size: 12px; /* Smaller form check label font size */
+}
+
+.form-check-input:checked {
+    background-color: #0070c9; /* Apple-like blue for checked checkboxes */
+}
+
+/* Button Styling */
+.btn-primary {
+    background-color: #0070c9; /* Apple-like blue button background color */
+    border: none;
+    color: #fff; /* Light text color for the button */
+    font-size: 14px; /* Smaller button font size */
+    font-weight: bold; /* Bold button text */
+    border-radius: 5px; /* Rounded corners for the button */
+    padding: 10px 20px; /* Add padding to make the button larger */
+    cursor: pointer; /* Add a pointer cursor on hover */
+}
+
+.btn-primary:hover {
+    background-color: #005bb8; /* Darker blue on hover */
+}
+
+/* Footer Styling */
+footer {
+    
+    background-color: #2e2e2e; /* Dark footer background color */
+    color: #888; /* Light text color for footer text */
+    font-size: 78px; /* Even smaller footer text font size */
+    padding: 10px; /* Add some padding to the footer */
+}
+/* Reduce padding and font-size for the header */
+
+/* Reduce the size of the header */
+.navbar {
+    padding: 10px 20px; /* Adjust these values as needed */
+    min-height: 50px; /* Set the minimum height for the header */
+}
+
+/* Reduce the size of the logo */
+.navbar-brand {
+    font-size: 16px; /* Adjust the font size as needed */
+}
+
+/* Reduce font size for the links */
+.nav-link {
+    font-size: 14px; /* Adjust the font size as needed */
+}
+
+/* Spread out text and fill the page width */
+.navbar-nav {
+    width: 50%;
+    justify-content: space-between;
+}
+
+.navbar-nav .nav-item {
+    flex: 1;
+    text-align: center;
+}
+
+
+/* Header alignment */
+.header-elements {
+    display: flex;
+    align-items: center;
+}
+
+/* Separate Cart link from the rest */
+.navbar-nav.navbar-right {
+    margin-left: 60px;
+}
+
+/* Optional: Add spacing between header elements */
+.navbar-nav li {
+    margin-right: 10px;
+}
+/* CSS for the Apple logo */
+.apple-logo {
+    width: 30px; /* Set the maximum width as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+/* Add this CSS to your styles.css or in a <style> tag in your HTML */
+.product-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.product-item {
+    flex: 0 0 calc(33.3333% - 10px); /* Adjust the width as needed */
+    margin: 5px;
+}
+
+
+/* Example CSS for styling input fields */
+.form-control-lg {
+    font-size: 18px; /* Increase font size */
+    padding: 15px; /* Increase padding for a larger input box */
+    border-radius: 10px; /* Add border-radius for rounded corners */
+    background-color: #f7f7f7; /* Change background color as needed */
+    border: 1px solid #ccc; /* Add border style */
+    color: #333; /* Adjust text color */
+}
+
+/* Additional styles can be added for labels, etc. */
+.label-lg {
+    font-size: 20px; /* Adjust label font size */
+    color: #333; /* Adjust label color */
+}
+/* Custom button styles */
+.custom-button {
+    background-color: #007BFF; /* Button background color */
+    color: #fff; /* Text color */
+    border: none;
+    padding: 10px 20px; /* Adjust padding as needed */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px; /* Adjust font size as needed */
+    border-radius: 10px; /* Rounded corners */
+    cursor: pointer;
+    margin: 5px;
+}
+
+/* Style for the "Go back" button */
+.custom-button-go-back {
+    background-color: #555; /* Change color for the "Go back" button */
+}
+
+/* Add more custom styles for other buttons if needed */
+/* In your styles.css or custom-styles.css */
+.product-card {
+    border: 2px solid #fff; /* Thicker and white border */
+    border-radius: 5px;
+    padding: 10px;
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+}
+
+.product-card img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #fff; /* Thicker and white border for images */
+    border-radius: 5px;
+}
+
+.product-card h3 {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: #333; /* Adjust text color */
+}
+
+.product-card p {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.trending-wrapper {
+    margin-top: 5px;
+}
+.interactive-background {
+    position: relative;
+    height: 400px; /* Adjust the height as needed */
+    overflow: hidden;
+}
+
+.background-image {
+    width: 100%;
+    height: 100%;
+    background: url('your-image.jpg') center/cover no-repeat; /* Replace 'your-image.jpg' with your image URL */
+    transition: transform 0.5s;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Adjust the background color and opacity as needed */
+    z-index: 1;
+}
+
+.interactive-background:hover .background-image {
+    transform: scale(1.1); /* Adjust the scale factor for the zoom effect */
+    transition: transform 0.5s;
+}
