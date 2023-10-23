@@ -8,6 +8,8 @@ use App\Models\Cart;
 use App\Models\Order;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Validator; // Import the Validator class
+use Storage; 
 
 class ProductController extends Controller
 {
@@ -30,6 +32,45 @@ class ProductController extends Controller
     $query = $request->input('query');
     $data = Product::where('name', 'like', '%' . $request->input('query').'%')->get();
     return view('search',['products'=>$data]);
+    
+}
+function addProducts(Request $request)
+{
+    //return view('addProducts');
+    if($request->session()->has('user')) 
+        {
+            $userId = $request->session()->get('user')['id'];
+//validate the request
+$request->validate([
+
+    'name' => 'required',
+    'price' => 'required',
+    'category' => 'required',
+    'description' => 'required',
+    'gallery_url' => 'required|url', 
+
+
+]);
+        $product = Product::create([
+            'name' => $request->name,
+            'price' => $request->price,
+            'category' => $request->category,
+            'description' => $request->description,
+            'gallery' => $request->gallery_url,
+        ]);
+    // Save the product in the database
+    $product->save();
+//I want to retrieve all the existing input data in te session as an array through te $request and put them under $input
+    $input=$request->all();
+    return view ('addProducts',['input'=>$input]);
+    }
+    else{
+        return redirect('/login');
+    }
+ // return view('addProducts');
+//redirect back
+//return redirect()->route('addProducts');
+    
 }
     function addToCart(Request $request){
         if($request->session()->has('user')) 
@@ -61,6 +102,12 @@ class ProductController extends Controller
   
     }
     
+
+
+
+
+
+
 // Buy Now
 function buyNow(Request $request){
     if ($request->session()->has('user')) {
@@ -124,7 +171,7 @@ function removeCart($cartId){
     Cart::destroy($cartId);
     return redirect('cartList');
 }
-function orderPlace(Request $request) {
+function orderPlace(Request $request,) {
     // Get the user ID
     $userId = Session::get('user')['id'];
 
@@ -132,6 +179,7 @@ function orderPlace(Request $request) {
     $cartItems = Cart::where('user_id', $userId)->get();
 
     $totalPrice = 0; // Initialize the total price to 0
+    $orders = []; // Initialize an array to store the orders
 
     // Loop through cart items to create orders
     foreach ($cartItems as $cart) {
@@ -144,30 +192,27 @@ function orderPlace(Request $request) {
         $order->address = $request->address;
         $order->save();
     
-      // Calculate the total price for this product and add it to the overall total
-      $product = Product::find($cart->product_id);
-      if ($product) {
-          $productTotalPrice = $product->price * $cart->quantity;
-          $totalPrice += $productTotalPrice;
-      }
-  }
+        // Calculate the total price for this product and add it to the overall total
+        $product = Product::find($cart->product_id);
+        if ($product) {
+            $productTotalPrice = $product->price * $cart->quantity;
+            $totalPrice += $productTotalPrice;
+        }
 
+        // Add the order to the orders array
+        $orders[] = $order;
+    }
 
     // Clear the user's cart after creating the orders
     Cart::where('user_id', $userId)->delete();
 
-    return view('myOrders', ['total' => $totalPrice]);
-
-// Return the view you want after the submission.
+    return view('orderPlace', ['orders' => $orders,
+    'total' => $totalPrice,]);
 }
-
-
+function sessionData(Request $request){
+    if($request->session()->has('user')){
+        
+        $userId = Session::get('user')['id'];
+    }
 }
- function myOrders()
-{
-    // Fetch all orders from the database
-    $orders = Order::all();
-
-    // Pass the orders to the 'myOrders' view
-    return view('myOrders', ['orders' => $orders]);
 }

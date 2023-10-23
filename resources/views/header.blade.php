@@ -11,7 +11,7 @@ if(Session::has('user'))
 ?>
 <nav class="navbar navbar-expand-lg navbar-light">
     <a class="navbar-brand" href="/index">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAUdb8cPqBgqBJjGHbKvRe1K8b2NHb-HdXQVQ0SvjTBN3wERDfSVEabOi39pivkuJUlgQ&usqp=CAU" alt="Apple Logo" class="apple-logo">
+        <img src="https://images-platform.99static.com//7cbls2GHcK5utTq4f0-ei-DZD14=/160x94:1832x1767/fit-in/500x500/99designs-contests-attachments/142/142649/attachment_142649676" alt="Apple Logo" class="apple-logo">
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -44,8 +44,11 @@ if(Session::has('user'))
                         Home
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Administrator</a>
-                    <a class="dropdown-item" href="#">Our Location</a>
+              
+    <a class="dropdown-item" href="{{ route('addProducts') }}">Administrator</a>
+
+
+                    <a class="dropdown-item" href="{{route('profile')}}">User Details</a>
                         <a class="dropdown-item" href="#">About Us</a>
                     </div>
                 </li>
@@ -55,7 +58,7 @@ if(Session::has('user'))
                         Orders
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="/myOrders">Find an Order</a>
+                    <a class="dropdown-item" href="">Find an Order</a>
                 </div>
                 </li>
 

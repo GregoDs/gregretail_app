@@ -14,7 +14,7 @@
 <link rel="stylesheet" type="text/css" href="{{ asset('styles.css') }}">
 <script>
     const images = [
-        'https://www.apple.com/v/iphone-15-pro/a/images/overview/welcome/hero_endframe__ov6ewwmbhiqq_large.jpg',
+        'https://tailwindcss.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2F1.71b6fa8c.png&w=1920&q=90',
         'https://www.apple.com/v/macbook-pro-14-and-16/e/images/overview/hero/hero_intro__cww8m2vra4uq_large.jpg',
     ];
 
@@ -34,8 +34,9 @@
 </script>
 
 </div>
-<div class="trending-wrapper" style="margin-top: 1px;">
-<h3>On Demand Products</h3>
+<div class="trending-wrapper" style="margin-top: 10px;">
+<h3 class="centered-heading">On Demand Products</h3>
+
     <div class="d-flex flex-row flex-wrap justify-content-center">
         @foreach($products as $item)
             <div class="product-card m-3 p-3 border">
@@ -49,6 +50,7 @@
             </div>
         @endforeach
     </div>
+    
 </div>
 <!-- Link to your styles.css -->
 <link rel="stylesheet" type="text/css" href="{{ asset('styles.css') }}">

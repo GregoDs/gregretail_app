@@ -95,18 +95,38 @@
     height: auto; /* Maintain aspect ratio */
 }
 </style>
+<div class="container custom-product">
+    <div class="receipt">
+        <h2>Your Order Receipt</h2>
+        <a href="/index"> <!-- Replace "/dashboard" with the actual URL of your dashboard page -->
+        <img src="https://images-platform.99static.com//7cbls2GHcK5utTq4f0-ei-DZD14=/160x94:1832x1767/fit-in/500x500/99designs-contests-attachments/142/142649/attachment_142649676" alt="Apple Logo" class="apple-logo">
+</a>
 
-<div class="container custom-login">
-  <div class="unit-copy-wrapper">
-    <h2 class="headline">iPhone 15 Pro</h2>
-    <h3 class="subhead" role="presentation">Titanium. So strong. So light. So Pro.</h3>
-    <div class="cta-links">
-      <a class="icon icon-after icon-chevronright" href="/iphone-15-pro/" target="_self" rel="follow" data-analytics-region="learn more" data-analytics-title="Learn more about iPhone 15 Pro" aria-label="Learn more about iPhone 15 Pro">Learn more</a>
-      <a class="icon icon-after icon-chevronright" href="/index" target="_self" rel="follow" data-analytics-region="buy" data-analytics-title="Buy iPhone 15 Pro" aria-label="Buy iPhone 15 Pro">Buy</a>
+        
+        <table class="table table-dark table-bordered">
+        <!-- Display orders details -->
+        <ul>
+            @foreach ($orders as $order)
+                <li>
+                    <strong>Product Price:</strong> ${{ $order->product->price }}
+                </li>
+            @endforeach
+        </ul>
+        @php
+                $vatRate = 0.16; // 16% VAT Rate
+                $vatAmount = $total * $vatRate;
+                @endphp
+        <!-- Display VAT amount -->
+        <p><strong>VAT 16%:</strong> ${{ number_format($vatAmount, 2) }}</p>
+        
+        <!-- Display total amount -->
+        <p><strong>Total Amount:</strong> ${{ number_format($total, 2) }}</p>
+</table>
+        <!-- Add an image with the hover effect -->
+<img src='https://www.apple.com/v/iphone-15-pro/a/images/overview/welcome/hero_endframe__ov6ewwmbhiqq_large.jpg' alt="iPhone Image" class="hover-image">
+
+    
     </div>
-
-    <!-- Add an image with the hover effect -->
-    <img src='https://www.apple.com/v/iphone-15-pro/a/images/overview/welcome/hero_endframe__ov6ewwmbhiqq_large.jpg' alt="iPhone Image" class="hover-image">
-  </div>
 </div>
+
 @endsection
