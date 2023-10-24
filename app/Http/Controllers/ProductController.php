@@ -9,7 +9,8 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Validator; // Import the Validator class
-use Storage; 
+use Storage;
+use Termwind\Components\Raw;
 
 class ProductController extends Controller
 {
@@ -72,6 +73,7 @@ $request->validate([
 //return redirect()->route('addProducts');
     
 }
+//Not Recommended 
     function addToCart(Request $request){
         if($request->session()->has('user')) 
         {
@@ -102,10 +104,6 @@ $request->validate([
   
     }
     
-
-
-
-
 
 
 // Buy Now
@@ -143,7 +141,12 @@ function buyNow(Request $request){
     }
 }
 
-static function cartItem() {
+
+
+   // Remove the $request parameter from the cartItem method
+ static function cartItem()
+{
+    // The cart count logic is here 
     if (Session::has('user')) {
         $userId = Session::get('user')['id'];
         return Cart::where('user_id', $userId)->count();
@@ -152,67 +155,276 @@ static function cartItem() {
     return 0; // Return a default value, such as 0, when 'user' session is not set.
 }
 
-    function cartList(){
-        if (Session::has('user')) {
+    
+    
+        function cartList(){
+            if (Session::has('user')) {
+            $userId = Session::get('user')['id'];
+    
+            $products= DB::table('cart')
+            ->join('products', 'cart.product_id','=','products.id')
+            ->where('cart.user_id',$userId)
+            ->select('products.*', 'cart.quantity','cart.id as cart_id')//include the 'cart.quantity in the select..to retrieve the quantity
+            ->get();
+    
+            return view('cartlist',['products'=>$products]);
+    }else {
+        return redirect('/login');
+    }
+    }
+
+//Remove from Cart in database...DESTROY
+    function removeCart($cartId){
+        Cart::destroy($cartId);
+        return redirect('cartList');
+    }
+
+
+
+    function orderPlace(Request $request) {
+        // Get the user ID
         $userId = Session::get('user')['id'];
+    
+        // Get the cart items for the user
+        $cartItems = Cart::where('user_id', $userId)->get();
+    
+        $totalPrice = 0; // Initialize the total price to 0
+        $orders = []; // Initialize an array to store the orders
+    
+        // Loop through cart items to create orders
+        foreach ($cartItems as $cart) {
+            $order = new Order();
+            $order->product_id = $cart->product_id;
+            $order->user_id = $userId;
+            $order->status = 'pending';
+            $order->payment_method = $request->payment;
+            $order->payment_status = 'pending';
+            $order->address = $request->address;
+            $order->save();
+        
+            // Calculate the total price for this product and add it to the overall total
+            $product = Product::find($cart->product_id);
+            if ($product) {
+                $productTotalPrice = $product->price * $cart->quantity;
+                $totalPrice += $productTotalPrice;
+            }
+    
+            // Add the order to the orders array
+            $orders[] = $order;
+        }
+    
+        // Clear the user's cart after creating the orders
+        Cart::where('user_id', $userId)->delete();
+    
+        return view('orderPlace', ['orders' => $orders,
+        'total' => $totalPrice,]);
+    }
 
-        $products= DB::table('cart')
-        ->join('products', 'cart.product_id','=','products.id')
-        ->where('cart.user_id',$userId)
-        ->select('products.*', 'cart.quantity','cart.id as cart_id')//include the 'cart.quantity in the select..to retrieve the quantity
-        ->get();
 
-        return view('cartlist',['products'=>$products]);
-}else {
+
+    //a more recommended method...to avoid logging up the Database and making it slow....store cart details in a session
+   
+   
+    public function addToCartSession(Request $request)
+    {//checks whether there is a user in session
+        if ($request->session()->has('user')) {
+            $userId = $request->session()->get('user')['id'];
+    //get the product_id from  session request and store it in $productId
+            $productId = $request->product_id;
+    
+            //checks whether the session has cart details 
+            if ($request->session()->has('cart')) {
+                //if present...gets the cart details from the session and stores it under variable $cart
+                $cart = $request->session()->get('cart');
+            } else {
+                //if not....create a new array to store new cart details
+                $cart = [];
+            }
+    //check if the array key speciffically $productId exists in the array $cart 
+            if (array_key_exists($productId, $cart)) {
+                //if true ....it increases quantity of the product via the product id 
+                $cart[$productId]['quantity'] += 1;
+            } else {
+                //if not....it attempts to find the product details in the product model...via the $productId
+                $product = Product::find($productId);
+
+                if ($product) {
+                    // If a product is present, it creates an associative array with two elements product id and quantity, which is added to the cart
+                    $cart[$productId] = [
+                        'product' => $product,
+                        'quantity' => 1,
+                    ];
+                } else {
+                    // If the product is not found, handle this situation (e.g., display an error message, log an error, etc.)
+                }
+                
+            }
+    //Stores the cart details inside the Session
+            $request->session()->put('cart', $cart);
+    
+            return redirect()->route('cartListSession');
+        } else {
+            return redirect('/login');
+        }
+    }
+    
+
+function cartListSession(Request $request){
+    if($request->session()->has('cart'))
+    {
+        //if session has cart details...proceed to get the details
+        $cart=$request->session()->get('cart');
+        $product=[];//create an empty array..for storing th products...remember..we are not stroing and finding products in the database
+
+        //iterate throughthe cartlist items
+        foreach($cart as $product_id=>$item){
+            //put products inside the array
+
+            $product[]=[
+                'product'=>$item['product'],
+                'quantity'=>$item['quantity'],
+            ];
+        }
+        return view('cartListSession',['products' => $product]);
+    }
     return redirect('/login');
 }
+//Clear Cart Session
+function clearCartSession(Request $request)
+{
+    if($request->Session()->has('cart'))
+    {
+        $request->session()->forget('cart');
+    }
+    return redirect('/index');
 }
-function removeCart($cartId){
-    Cart::destroy($cartId);
-    return redirect('cartList');
-}
-function orderPlace(Request $request,) {
-    // Get the user ID
-    $userId = Session::get('user')['id'];
-
-    // Get the cart items for the user
-    $cartItems = Cart::where('user_id', $userId)->get();
-
-    $totalPrice = 0; // Initialize the total price to 0
-    $orders = []; // Initialize an array to store the orders
-
-    // Loop through cart items to create orders
-    foreach ($cartItems as $cart) {
-        $order = new Order();
-        $order->product_id = $cart->product_id;
-        $order->user_id = $userId;
-        $order->status = 'pending';
-        $order->payment_method = $request->payment;
-        $order->payment_status = 'pending';
-        $order->address = $request->address;
-        $order->save();
+public function removeItemFromCart($id)
+{
+    $cart = session('cart', []);//retrieve current cart from the session ...if it doesnt exist...creates an  empty array for it
     
-        // Calculate the total price for this product and add it to the overall total
-        $product = Product::find($cart->product_id);
+    if (isset($cart[$id])) {//check if the specified productId exists in the cart array
+        unset($cart[$id]);//if it does..unset removes it
+        session(['cart' => $cart]);//store modified cart back into the session
+    }
+
+    return redirect()->route('cartListSession');
+}
+
+
+
+static function cartItemSession(Request $request){
+    
+    if($request->session()->has('cart'))
+    {
+        //if session has cart details...proceed to get the details
+        $cart=$request->session()->get('cart');
+
+$cartItems=0;//initialize the cart items
+
+//iterate through the cartitems
+foreach($cart as $item){
+    $cartItems+=$item['quantity'];
+}
+
+        return($cartItems);
+}else{
+    return 0;
+}
+}
+public function buyNowSession(Request $request)
+{
+    if($request->session()->has('user'))
+    {
+        $userId = $request->session()->get('user')['id'];
+//get the cart items from the session
+$cart=$request->session()->get('cart');
+
+$totalPrice=0;//initialize totalprice to zero
+
+ // You can now process the cart items
+ foreach ($cart as $productId => $item) {
+    // For each item in the cart, you can process it as needed
+    $product = Product::find($productId);
+    
+    //my Purchase Logic
+    $productTotalPrice=$product->price * $item['quantity'];
+    $totalPrice+=$productTotalPrice;
+
+    // You can also remove the purchased items from the session cart if needed
+    unset($cart[$productId]);
+}
+
+// Update the cart in the session (if you removed purchased items)
+$request->session()->put('cart', $cart);
+
+// Redirect to a "Thank You" page or wherever you want to go after the purchase
+return view('buyNowSession',['cart'=>$cart,'total' => $totalPrice,]);
+} else {
+// Redirect to the login page if the user is not authenticated
+return redirect('/login');
+}
+    }
+
+
+
+    public function placeOrderFromSession(Request $request)
+{
+    if (!$request->session()->has('user')) {
+        // Redirect to the login page if the user is not authenticated
+        return redirect('/login');
+    }
+
+    // Get the authenticated user
+    $user = auth()->user();
+
+    if (!$user) {
+        // if user is not authenticated 
+        return redirect('/login');
+    }
+
+    // Get the cart items from the session
+    $cart = $request->session()->get('cart', []);
+
+    // Initialize total price to zero
+    $totalPrice = 0;
+
+    // Create orders based on the cart items...loop through the cart
+    foreach ($cart as $productId => $item) {
+        // Find the product in the database via the product model
+        $product = Product::find($productId);
+
         if ($product) {
-            $productTotalPrice = $product->price * $cart->quantity;
+            // Calculate the total price for this product..if it is present
+            $productTotalPrice = $product->price * $item['quantity'];
             $totalPrice += $productTotalPrice;
+
+            // Create an order for this product
+            $order = new Order();
+            $order->user_id = $user->id;
+            $order->product_id = $product->id;
+            $order->quantity = $item['quantity'];
+            $order->total_price = $productTotalPrice;
+            $order->save();
+
+            // Remove the purchased item from the session cart
+            unset($cart[$productId]);
         }
-
-        // Add the order to the orders array
-        $orders[] = $order;
     }
 
-    // Clear the user's cart after creating the orders
-    Cart::where('user_id', $userId)->delete();
+    // Update the cart in the session (if you removed purchased items)
+    $request->session()->put('cart', $cart);
 
-    return view('orderPlace', ['orders' => $orders,
-    'total' => $totalPrice,]);
+    // Redirect to a "Thank You" page or wherever you want to go after the purchase
+    return view('/orderReceipt', ['totalPrice' => $totalPrice]);
 }
-function sessionData(Request $request){
-    if($request->session()->has('user')){
-        
-        $userId = Session::get('user')['id'];
-    }
+
 }
-}
+
+
+    
+
+
+
+
+
+

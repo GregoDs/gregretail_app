@@ -78,7 +78,7 @@ if(Session::has('user'))
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-    <li><a href="{{ route('cart.list') }}">Cart ({{ ProductController::cartItem() }})</a></li>
+    <li><a href="{{ route('cartListSession') }}">Cart ({{ ProductController::cartItem() }})</a></li>
 </ul>
         </div>
         <!-- End of header-elements div -->
