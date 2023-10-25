@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Validator; // Import the Validator class
@@ -202,7 +203,7 @@ function buyNow(Request $request){
             $order->address = $request->address;
             $order->save();
         
-            // Calculate the total price for this product and add it to the overall total
+            // Calculate the total price for this product and add it to the overall total...for the receipt purpose
             $product = Product::find($cart->product_id);
             if ($product) {
                 $productTotalPrice = $product->price * $cart->quantity;
@@ -292,22 +293,12 @@ function cartListSession(Request $request){
 //Clear Cart Session
 function clearCartSession(Request $request)
 {
-    if($request->Session()->has('cart'))
+    $cart=$request->session()->has('cart');
+    if($cart)
     {
         $request->session()->forget('cart');
     }
     return redirect('/index');
-}
-public function removeItemFromCart($id)
-{
-    $cart = session('cart', []);//retrieve current cart from the session ...if it doesnt exist...creates an  empty array for it
-    
-    if (isset($cart[$id])) {//check if the specified productId exists in the cart array
-        unset($cart[$id]);//if it does..unset removes it
-        session(['cart' => $cart]);//store modified cart back into the session
-    }
-
-    return redirect()->route('cartListSession');
 }
 
 
@@ -321,6 +312,7 @@ static function cartItemSession(Request $request){
 
 $cartItems=0;//initialize the cart items
 
+
 //iterate through the cartitems
 foreach($cart as $item){
     $cartItems+=$item['quantity'];
@@ -331,6 +323,38 @@ foreach($cart as $item){
     return 0;
 }
 }
+
+
+public function removeItemFromCart(Request $request)
+{
+   // Retrieve the current cart from the session; create an empty array if it doesn't exist
+if($request->session()->has('cart'))
+     {
+        $cart=$request->session()->get('cart',[]); 
+        $cartItems = 0;
+
+        foreach ($cart as $productId => &$item) { // Use &$item to modify the original array
+            // Perform logic for removing items in the cart
+            if ($item['quantity'] > 1) {
+                $item['quantity'] -= 1;
+            } else {
+                unset($cart[$productId]);
+            }
+            // Update the total cart items
+            $cartItems += $item['quantity'];
+        }
+
+        // Reindex the array
+      //  $cart = array_values($cart);
+
+        // Store the updated cart in the session
+        session(['cart' => $cart]);
+    }
+
+    return redirect()->route('cartListSession');
+}
+
+
 public function buyNowSession(Request $request)
 {
     if($request->session()->has('user'))
@@ -351,7 +375,7 @@ $totalPrice=0;//initialize totalprice to zero
     $totalPrice+=$productTotalPrice;
 
     // You can also remove the purchased items from the session cart if needed
-    unset($cart[$productId]);
+   // unset($cart[$productId]);
 }
 
 // Update the cart in the session (if you removed purchased items)
@@ -375,7 +399,8 @@ return redirect('/login');
     }
 
     // Get the authenticated user
-    $user = auth()->user();
+    $user=$request->session()->get('user');
+   //or // $user = auth()->user();
 
     if (!$user) {
         // if user is not authenticated 
@@ -387,11 +412,18 @@ return redirect('/login');
 
     // Initialize total price to zero
     $totalPrice = 0;
+    $order_id = 0;
+    $userName = 0;
+    $Date= 0;
+
+    //get the usersname from the user database table...via model
+    $userName= User::find($user->id)->name;
+
 
     // Create orders based on the cart items...loop through the cart
     foreach ($cart as $productId => $item) {
         // Find the product in the database via the product model
-        $product = Product::find($productId);
+        $product = Product::find($item['product']['id']);
 
         if ($product) {
             // Calculate the total price for this product..if it is present
@@ -399,12 +431,27 @@ return redirect('/login');
             $totalPrice += $productTotalPrice;
 
             // Create an order for this product
-            $order = new Order();
-            $order->user_id = $user->id;
-            $order->product_id = $product->id;
-            $order->quantity = $item['quantity'];
-            $order->total_price = $productTotalPrice;
+            $order = new Order();//mass assign...and fill in database..order table
+            $order->fill([
+                'user_id' => $user->id,
+                'product_id' => $item['product']['id'],
+                'status' => 'pending',
+                'payment_method' => $request->payment,
+                'payment_status' => 'pending',
+                'address' => $request->address,
+            ]);
             $order->save();
+
+            //get the order details...and other details for viewing
+            $order_id=$order->id;
+
+    //find the date of order
+    $Date= $order->updated_at;
+
+            //$order->product_id = $product->id;
+           // $order->quantity = $item['quantity'];
+            //$order->total_price = $productTotalPrice;
+            //$order->save();
 
             // Remove the purchased item from the session cart
             unset($cart[$productId]);
@@ -415,7 +462,12 @@ return redirect('/login');
     $request->session()->put('cart', $cart);
 
     // Redirect to a "Thank You" page or wherever you want to go after the purchase
-    return view('/orderReceipt', ['totalPrice' => $totalPrice]);
+    return view('/orderReceipt', [
+        'total' => $totalPrice,
+        'order_id'=>$order_id,
+        'userName'=>$userName,
+        'Date'=>$Date,
+]);
 }
 
 }
