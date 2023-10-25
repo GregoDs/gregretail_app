@@ -1,5 +1,41 @@
 @extends('master')
 @section('content')
+<div class="container custom-order">
+    <div class="row">
+        <div class="col-sm-10">
+            <h2>Your Premium Order</h2>
+         
+
+            <table class="table table-dark table-bordered">
+                <tr>
+                    <th class="text-light">Item</th>
+                    <th class="text-light">Amount</th>
+                </tr>
+                <tr>
+                    <td class="text-light">Price</td>
+                    <td class="text-light">${{ number_format($total, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-light">Duration</td>
+                    <td class="text-light">1 week</td>
+                </tr>
+
+                @php
+                $vatRate = 0.16; // 16% VAT Rate
+                $vatAmount = $total * $vatRate;
+                $totalPrice = $total + $vatAmount;
+                @endphp
+                <tr>
+                    <td class="text-light">VAT 16%</td>
+                    <td class="text-light">${{ number_format($vatAmount, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-light">Total</td>
+                    <td class="text-light">${{ number_format($totalPrice, 2) }}</td>
+                </tr>
+            </table>
+        </div>
+
 <form method="POST" action="/placeOrderFromSession">
     @csrf
 <div class="container custom-product">
